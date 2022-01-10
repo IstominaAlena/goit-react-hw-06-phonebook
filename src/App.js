@@ -1,37 +1,42 @@
+import { connect } from 'react-redux';
+
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { nanoid } from 'nanoid';
+// import { nanoid } from 'nanoid';
 
 import Section from './shared/components/Section';
 import FormContacts from './components/FormContacts';
 import Input from './shared/components/Input';
 import ContactList from './components/ContactList';
-
-// import useLocalStorage from './hooks/useLocalStorage';
+import { addContact, deleteContact } from './redux/items/itemsActions';
 
 import './styles/App.css';
 
-const App = () => {
-  const [contacts, setContacts] = useState([]);
+const App = ({ items, add, mount, remove }) => {
+  // const [contacts, setContacts] = useState([]);
   const [filter, setFilter] = useState('');
   const isFirstRender = useRef(true);
+  console.log(items);
 
-  useEffect(() => {
-    const contactsList = JSON.parse(localStorage.getItem('contacts'));
+  // useEffect(() => {
+  //   const itemsList = JSON.parse(localStorage.getItem('items'));
 
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (!Array.isArray(contactsList)) {
-        return;
-      }
-      if (contactsList.length) {
-        setContacts(contactsList);
-      }
-      return;
-    }
-    if (contactsList.length !== contacts.length) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
-    }
-  }, [contacts]);
+  //   if (isFirstRender.current) {
+  //     isFirstRender.current = false;
+
+  //     if (!Array.isArray(itemsList)) {
+  //       return;
+  //     }
+
+  //     if (itemsList.length) {
+  //       mount(itemsList);
+  //       return;
+  //     }
+  //   }
+
+  //   if (itemsList.length !== items.length) {
+  //     localStorage.setItem('items', JSON.stringify(items));
+  //   }
+  // }, [items, mount]);
 
   function checkContactHandler({ name, number }) {
     if (!name) {
@@ -40,13 +45,14 @@ const App = () => {
     if (!number) {
       return alert('Please enter number!');
     }
+
     addContactHandler({ name, number });
   }
 
   function addContactHandler({ name, number }) {
     const lowerCaseName = name.toLowerCase();
 
-    const findInArray = contacts.find(({ name }) => {
+    const findInArray = items.find(({ name }) => {
       const lowerCaseStateName = name.toLowerCase();
       return lowerCaseStateName === lowerCaseName;
     });
@@ -55,21 +61,15 @@ const App = () => {
       return alert(`${name} is already in your contacts!`);
     }
 
-    const contact = {
-      name,
-      number,
-      id: nanoid(),
-    };
-
-    setContacts(contacts => [...contacts, contact]);
+    add({ name, number });
   }
 
-  const deleteContactHandler = useCallback(
-    id => {
-      setContacts(contacts => contacts.filter(contact => contact.id !== id));
-    },
-    [setContacts]
-  );
+  // const deleteContactHandler = useCallback(
+  //   id => {
+  //     setContacts(contacts => contacts.filter(contact => contact.id !== id));
+  //   },
+  //   [setContacts]
+  // );
 
   function filterChangeHandler(e) {
     const { value } = e.target;
@@ -78,12 +78,12 @@ const App = () => {
 
   function filterContactsHandler() {
     if (!filter) {
-      return contacts;
+      return items;
     }
 
     const lowerCaseFilter = filter.toLowerCase();
 
-    const filteredContacts = contacts.filter(({ name }) => {
+    const filteredContacts = items.filter(({ name }) => {
       const lowerCaseName = name.toLowerCase();
       return lowerCaseName.includes(lowerCaseFilter);
     });
@@ -108,10 +108,19 @@ const App = () => {
       </Section>
 
       <Section title={'Contacts'} classEl={'contacts'}>
-        <ContactList contacts={filterContactsHandler()} onDeleteItem={deleteContactHandler} />
+        <ContactList contacts={items} onDeleteItem={remove} />
       </Section>
     </>
   );
 };
 
-export default App;
+const mapStateToProps = state => ({
+  items: state.items,
+});
+
+const mapDispatchToProps = {
+  add: addContact,
+  remove: deleteContact,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
