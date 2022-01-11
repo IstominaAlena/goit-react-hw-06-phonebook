@@ -1,52 +1,44 @@
-import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
-import PropTypes from 'prop-types';
-
+import { addContact } from '../../redux/items/itemsActions';
 import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
 
-import styles from './FormContacts.module.css';
+import s from './FormContacts.module.css';
 
-const FormContacts = props => {
-  const [state, setState] = useState({
-    name: '',
-    number: '',
-  });
-  const { name, number } = state;
-
-  function handleInputChange(e) {
-    const { name, value } = e.target;
-    setState({
-      ...state,
-      [name]: value,
-    });
-  }
-
-  const contact = {
-    name,
-    number,
-  };
+const FormContacts = () => {
+  const dispatch = useDispatch();
 
   function handleSubmit(e) {
     e.preventDefault();
-    props.submitedData(contact);
+
+    const formElements = new FormData(e.currentTarget);
+    const dataObj = {};
+
+    formElements.forEach((value, name) => (dataObj[name] = value));
+    const { name, number } = dataObj;
+
+    if (!name || !number) {
+      return alert('Please fill the form');
+    }
+
+    dispatch(addContact(name, number));
     resetForm();
   }
 
   function resetForm() {
-    setState({
-      name: '',
-      number: '',
-    });
+    const nameInput = document.querySelector('input[name="name"]');
+    const numberInput = document.querySelector('input[name="number"]');
+
+    nameInput.value = '';
+    numberInput.value = '';
   }
 
   return (
     <>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className={s.form}>
         <Input
           labelName="Name"
-          value={name}
-          onChange={handleInputChange}
           type="text"
           name="name"
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
@@ -56,8 +48,6 @@ const FormContacts = props => {
 
         <Input
           labelName="Number"
-          value={number}
-          onChange={handleInputChange}
           type="tel"
           name="number"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
@@ -72,7 +62,3 @@ const FormContacts = props => {
 };
 
 export default FormContacts;
-
-FormContacts.propTypes = {
-  submitedData: PropTypes.func.isRequired,
-};

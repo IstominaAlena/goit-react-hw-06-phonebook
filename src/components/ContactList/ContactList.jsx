@@ -1,27 +1,27 @@
-import { memo } from 'react';
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
+import { memo } from 'react';
 import toonavatar from 'cartoon-avatar';
-import styles from './ContactList.module.css';
 
+import { deleteContact } from '../../redux/items/itemsActions';
 import Button from '../../shared/components/Button';
 
-const ContactList = ({ contacts, onDeleteItem }) => {
+import s from './ContactList.module.css';
+
+const ContactList = ({ array }) => {
+  const dispatch = useDispatch();
+
   return (
-    <ul className={styles.contactList}>
-      {contacts.map(({ id, name, number }) => (
-        <li key={id} className={styles.contactItem}>
-          <img
-            src={toonavatar.generate_avatar()}
-            alt="img"
-            width="60"
-            className={styles.contactImg}
-          />
+    <ul className={s.contactList}>
+      {array.map(({ id, name, number }) => (
+        <li key={id} className={s.contactItem}>
+          <img src={toonavatar.generate_avatar()} alt="img" width="60" className={s.contactImg} />
           <div>
             <p>{name}:</p>
             <p>{number}</p>
           </div>
 
-          <Button type="button" text="&#128473;" onClick={() => onDeleteItem(id)} />
+          <Button type="button" text="&#128473;" onClick={() => dispatch(deleteContact(id))} />
         </li>
       ))}
     </ul>
@@ -31,12 +31,11 @@ const ContactList = ({ contacts, onDeleteItem }) => {
 export default memo(ContactList);
 
 ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
+  array: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       number: PropTypes.string.isRequired,
     })
   ),
-  // onDeleteItem: PropTypes.func.isRequired,
 };
