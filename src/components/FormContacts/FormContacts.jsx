@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 
-import { addContact } from '../../redux/items/itemsActions';
+import { addContact } from '../../redux/contacts/itemsActions';
 import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
 
